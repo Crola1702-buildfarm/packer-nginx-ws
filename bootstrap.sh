@@ -22,6 +22,12 @@ git clone git@github.com:Crola1702-buildfarm/chef-nginx-ws.git
 cd chef-nginx-ws/crola-chef
 sops -d -i data_bags/key_databag/sops-key.json
 
+echo "Check that key was decrypted"
+cat data_bags/key_databag/sops-key.json
+
 sudo cinc-solo -c ".chef/solo.rb" -j "solo/nginx_web_server.json"
+
+echo "Cleaning up"
+sudo rm -rf chef-nginx-ws
 
 echo "Done"
