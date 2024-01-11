@@ -10,13 +10,13 @@ packer {
 variable "sops_age_key" {
   type        = string
   description = "Sops Age secret key used to decrypt chef databags"
-  sensitive   = true
+  # sensitive   = true
 }
 
 
 source "amazon-ebs" "ubuntu" {
   ami_name                    = "linux-nginx-${formatdate("YYYY-MM-DD'T'hh.mm.ssZ", timestamp())}"
-  subnet_id                   = "" # Change this to your subnet id
+  subnet_id                   = "subnet-0eeb83f33a7415ed1" # Change this to your subnet id
   source_ami                  = "ami-0261755bbcb8c4a84"
   associate_public_ip_address = true
   instance_type               = "t2.micro"
@@ -27,6 +27,28 @@ source "amazon-ebs" "ubuntu" {
 build {
   name    = "linux-nginx"
   sources = ["source.amazon-ebs.ubuntu"]
+
+  provisioner "shell" {
+    inline = [
+	"pwd"
+    ]
+  }
+
+  provisioner "shell-local" {
+    command = "tar cf toupload/files.tar ../chef-nginx-ws"
+  }
+
+  provisioner "file" {
+    destination = "./"
+    source = "./toupload"
+  }
+
+  provisioner "shell" {
+    inline = [
+	"tar xf toupload/files.tar",
+	"rm toupload/files.tar"
+    ]
+  }
 
   provisioner "shell" {
     script = "bootstrap.sh"
